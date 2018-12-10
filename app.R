@@ -16,6 +16,11 @@
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #install.packages('conflicted')
+if (!"shiny" %in% installed.packages()) install.packages('ggplot2_2.2.1.tgz')
+if (!"readxl" %in% installed.packages()) install.packages('drc_3.0-1.tar.gz')
+if (!"drc" %in% installed.packages()) install.packages('dplyr_0.7.4.tar.gz')
+if (!"ggplot2" %in% installed.packages()) install.packages('gdata_2.18.0.tar')
+if (!"dplyr" %in% installed.packages()) install.packages('knitr_1.20.tar.gz')
 library(shiny)
 library(readxl)
 library(drc)
