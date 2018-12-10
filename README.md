@@ -1,7 +1,7 @@
 # InnovaTest
 
 ### Licence
-InnovaTest. Web-based software to process data from ELISA and calculate ED50/LD50/IC50  
+InnovaTest. R-based software to process data from ligand-binding assays (eg. ELISA, Pierce)  
 based on 4PL sigmoid curve.
 Copyright (c) 2018  Olga Poleshchuk, Ruslan Al-Shehadat  
 
