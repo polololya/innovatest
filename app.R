@@ -16,11 +16,11 @@
 #     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #install.packages('conflicted')
-if (!"shiny" %in% installed.packages()) install.packages('ggplot2_2.2.1.tgz')
-if (!"readxl" %in% installed.packages()) install.packages('drc_3.0-1.tar.gz')
-if (!"drc" %in% installed.packages()) install.packages('dplyr_0.7.4.tar.gz')
-if (!"ggplot2" %in% installed.packages()) install.packages('gdata_2.18.0.tar')
-if (!"dplyr" %in% installed.packages()) install.packages('knitr_1.20.tar.gz')
+if (!"shiny" %in% installed.packages()) install.packages('shiny')
+if (!"readxl" %in% installed.packages()) install.packages('readxl')
+if (!"drc" %in% installed.packages()) install.packages('drc')
+if (!"ggplot2" %in% installed.packages()) install.packages('ggplot2')
+if (!"dplyr" %in% installed.packages()) install.packages('dplyr')
 library(shiny)
 library(readxl)
 library(drc)
@@ -39,7 +39,7 @@ b = letters
 set = data.frame(a,b)
 
 ui = navbarPage(title = " InnovaTest ELISA Curve Fitting ",
-           tabPanel("Table mode", 
+           tabPanel("Table Mode", 
                     sidebarLayout(
                           sidebarPanel(
                             fileInput(inputId='inputfile',label='Upload your file',
@@ -48,6 +48,7 @@ ui = navbarPage(title = " InnovaTest ELISA Curve Fitting ",
                             sliderInput(inputId = 'Replicates', label = 'Maximal number of replicates', min = 1, max = 20, value = 2),
                             radioButtons(inputId = "Filetype",label = h4("Choose File type"),
                                          choices = list(".csv" = 1, ".xlsx" = 2), selected = 1,inline = TRUE),
+                            textInput(inputId = 'Sheet', label = 'Excel sheet number', value = 1),
                             #radioButtons(inputId = 'Separator', label = 'Columns separator (CSV only)', choices = c('Tab'='\t', 'Comma'=',', 'Space'=' ')),
                             #radioButtons(inputId = 'Decimal', 'Decimal separator (CSV only)', c('Comma'=',', 'Dot'='.')),
                             #checkboxInput(inputId = 'Remove_out', label = 'Remove fuckin outliers', value = F),
@@ -73,7 +74,7 @@ ui = navbarPage(title = " InnovaTest ELISA Curve Fitting ",
                             plotOutput('model', height = "600px", width = "100%")
                           )
                         )),
-           tabPanel("Plate mode",
+           tabPanel("Plate Mode",
                     sidebarLayout(
                       sidebarPanel(
                         fileInput(inputId='inputfile_plate',label='Upload your file (.xls only)',
@@ -93,6 +94,7 @@ ui = navbarPage(title = " InnovaTest ELISA Curve Fitting ",
                         tags$h4('Curve plot'),
                         plotOutput('model_plate', height = "600px", width = "100%")
                       ))),
+           tabPanel('Multiple Plates Mode'),
            tabPanel("Instructions",includeHTML('instructions.html'))
            
 )
@@ -102,6 +104,7 @@ server = function(input, output) {
     #col_range
     a = reactive({paste('A',':',set$b[input$Replicates+1], sep = '')})
     ODs = reactive({paste('OD', c(1:input$Replicates), collapse=NULL)})
+    sheet = reactive({as.numeric(input$Sheet)})
     
     #download file
     data <- reactive({
@@ -111,7 +114,7 @@ server = function(input, output) {
       if (input$Filetype == '1') {
         read.csv(input$inputfile$datapath, stringsAsFactors = FALSE)
       } else {
-        read_excel(input$inputfile$datapath, col_names = F, col_types = 'numeric', range = cell_cols(a()))
+        read_excel(input$inputfile$datapath, col_names = F, col_types = 'numeric', range = cell_cols(a()), sheet = sheet())
       }
     })
     
