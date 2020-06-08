@@ -1,0 +1,12 @@
+name: innovatest
+title: innovatest
+username:
+account: innovatest
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 514510
+bundleId: 3243368
+url: https://innovatest.shinyapps.io/InnovaTest/
+when: 1591633172.01801
+asMultiple: FALSE
+asStatic: FALSE

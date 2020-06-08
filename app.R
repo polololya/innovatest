@@ -185,14 +185,21 @@ server = function(input, output) {
     test$CV[is.na(test$CV)] = 0
     
     #Fit model
-    fit = drm(ODmean ~ Concentration, data=cal, fct=LL.4(names=c('Slope','Lower Limit','Upper Limit','ED50')))
+    fit = drm(ODmean ~ Concentration, data=cal, 
+              fct=LL.4(names=c('Slope','Lower Limit','Upper Limit','ED50')))
+    
+    #extract coefficients
+    A = fit$coefficients[[2]]
+    B = fit$coefficients[[1]]
+    C = fit$coefficients[[4]]
+    D = fit$coefficients[[3]]
     
     #Predict concentrations
-    cal$Result = fit$coefficients[[4]]*(((-1*fit$coefficients[[2]]+cal$ODmean)/(fit$coefficients[[3]]-cal$ODmean))^(1/-fit$coefficients[[1]]))
+    cal$Result = C*(((-1*A+cal$ODmean)/(D-cal$ODmean))^(1/-B))
     cal$Log10Conc = log10(cal$Result)
     output$cal = renderTable(cal, hover = T,digits = 3, bordered = T)
     
-    test$Result = fit$coefficients[[4]]*(((-1*fit$coefficients[[2]]+test$ODmean)/(fit$coefficients[[3]]-test$ODmean))^(1/-fit$coefficients[[1]]))
+    test$Result = C*(((-1*A+test$ODmean)/(D-test$ODmean))^(1/-B))
     test$Log10Conc = log10(test$Result)
     output$Test_final = renderTable(test, hover = T,digits = 3, bordered = T)
     
@@ -201,7 +208,7 @@ server = function(input, output) {
     #calcuate model and plot
     xmin = ifelse(min(cal$Concentration) == 0, 0.01, min(cal$Concentration))
     x = seq(xmin, max(cal$Concentration), length=100)
-    y = (fit$coefficients[[2]]+(fit$coefficients[[3]]-fit$coefficients[[2]])/(1+(x/fit$coefficients[[4]])^fit$coefficients[[1]]))
+    y = (D+(A-D)/(1+(x/C)^-B))
     model = data.frame(x,y)
     
     # output$model = renderPlot({
@@ -212,6 +219,12 @@ server = function(input, output) {
     #     geom_line(data = model, aes(x = log10(x), y = y, color = 'red'), inherit.aes = FALSE) +
     #     geom_point(data = test, aes(x = log10(test$Result), y = test$ODmean, color = 'blue'), inherit.aes = FALSE) +
     #     theme_bw() + guides(color = 'none')})
+
+    A = round(A, 3)
+    B = round(-B, 3)
+    C = round(C, 3)
+    D = round(D, 3)
+    plot_title = paste('A=',A,', B=',B,', C=',C,', D=',D, sep='')
     
     output$model = renderPlot({
       ggplot(cal, aes(log10(Concentration), ODmean)) +
@@ -222,6 +235,7 @@ server = function(input, output) {
         geom_point(data = test, aes(x = log10(test$Result), y = test$ODmean, color = 'Test Results'), inherit.aes = FALSE) +
         geom_point(data = cal, aes(x = log10(cal$Result), y = cal$ODmean, color = 'Calibration Results'), inherit.aes = FALSE) +
         theme_bw() + 
+        ggtitle(plot_title) +
         scale_color_manual(name = ' ',values = c('4PL model' = '#0FAFA7', 'Test Results' = '#F7B538', 'Calibration Results' = '#C84C09', 'Calibration' = '#444444'))})
     
 ######## Save results ##########
